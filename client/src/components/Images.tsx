@@ -10,94 +10,94 @@ import {
   Header,
   Icon,
   Input,
-  Image,
+  Image as ImageUI,
   Loader
 } from 'semantic-ui-react'
 
-import { createTodo, deleteTodo, getTodos, patchTodo } from '../api/todos-api'
+import { createImage, deleteImage, getImages, patchImage } from '../api/images-api'
 import Auth from '../auth/Auth'
-import { Todo } from '../types/Todo'
+import { Image } from '../types/Image'
 
-interface TodosProps {
+interface ImagesProps {
   auth: Auth
   history: History
 }
 
-interface TodosState {
-  todos: Todo[]
-  newTodoName: string
-  loadingTodos: boolean
+interface ImagesState {
+  images: Image[]
+  newImageName: string
+  loadingImages: boolean
 }
 
-export class Todos extends React.PureComponent<TodosProps, TodosState> {
-  state: TodosState = {
-    todos: [],
-    newTodoName: '',
-    loadingTodos: true
+export class Images extends React.PureComponent<ImagesProps, ImagesState> {
+  state: ImagesState = {
+    images: [],
+    newImageName: '',
+    loadingImages: true
   }
 
   handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ newTodoName: event.target.value })
+    this.setState({ newImageName: event.target.value })
   }
 
-  onEditButtonClick = (todoId: string) => {
-    this.props.history.push(`/todos/${todoId}/edit`)
+  onEditButtonClick = (imageId: string) => {
+    this.props.history.push(`/images/${imageId}/edit`)
   }
 
-  onTodoCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
+  onImageCreate = async (event: React.ChangeEvent<HTMLButtonElement>) => {
     try {
       const dueDate = this.calculateDueDate()
-      const newTodo = await createTodo(this.props.auth.getIdToken(), {
-        name: this.state.newTodoName,
+      const newImage = await createImage(this.props.auth.getIdToken(), {
+        name: this.state.newImageName,
         dueDate
       })
       this.setState({
-        todos: [...this.state.todos, newTodo],
-        newTodoName: ''
+        images: [...this.state.images, newImage],
+        newImageName: ''
       })
     } catch {
-      alert('Todo creation failed')
+      alert('Image creation failed')
     }
   }
 
-  onTodoDelete = async (todoId: string) => {
+  onImageDelete = async (imageId: string) => {
     try {
-      await deleteTodo(this.props.auth.getIdToken(), todoId)
+      await deleteImage(this.props.auth.getIdToken(), imageId)
       this.setState({
-        todos: this.state.todos.filter(todo => todo.todoId != todoId)
+        images: this.state.images.filter(image => image.imageId != imageId)
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Image deletion failed')
     }
   }
 
-  onTodoCheck = async (pos: number) => {
+  onImageCheck = async (pos: number) => {
     try {
-      const todo = this.state.todos[pos]
-      await patchTodo(this.props.auth.getIdToken(), todo.todoId, {
-        name: todo.name,
-        dueDate: todo.dueDate,
-        done: !todo.done
+      const image = this.state.images[pos]
+      await patchImage(this.props.auth.getIdToken(), image.imageId, {
+        name: image.name,
+        dueDate: image.dueDate,
+        done: !image.done
       })
       this.setState({
-        todos: update(this.state.todos, {
-          [pos]: { done: { $set: !todo.done } }
+        images: update(this.state.images, {
+          [pos]: { done: { $set: !image.done } }
         })
       })
     } catch {
-      alert('Todo deletion failed')
+      alert('Image deletion failed')
     }
   }
 
   async componentDidMount() {
     try {
-      const todos = await getTodos(this.props.auth.getIdToken())
+      const images = await getImages(this.props.auth.getIdToken())
       this.setState({
-        todos,
-        loadingTodos: false
+        images,
+        loadingImages: false
       })
     } catch (e) {
-      alert(`Failed to fetch todos: ${e.message}`)
+      alert(`Failed to fetch images: ${e.message}`)
     }
   }
 
@@ -106,14 +106,14 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       <div>
         <Header as="h1">Gallery</Header>
 
-        {this.renderCreateTodoInput()}
+        {this.renderCreateImageInput()}
 
-        {this.renderTodos()}
+        {this.renderImages()}
       </div>
     )
   }
 
-  renderCreateTodoInput() {
+  renderCreateImageInput() {
     return (
       <Grid.Row>
         <Grid.Column width={16}>
@@ -123,7 +123,7 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
               labelPosition: 'left',
               icon: 'add',
               content: 'Title of your image',
-              onClick: this.onTodoCreate
+              onClick: this.onImageCreate
             }}
             fluid
             actionPosition="left"
@@ -138,51 +138,51 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
     )
   }
 
-  renderTodos() {
-    if (this.state.loadingTodos) {
+  renderImages() {
+    if (this.state.loadingImages) {
       return this.renderLoading()
     }
 
-    return this.renderTodosList()
+    return this.renderImagesList()
   }
 
   renderLoading() {
     return (
       <Grid.Row>
         <Loader indeterminate active inline="centered">
-          Loading TODOs
+          Loading IMAGEs
         </Loader>
       </Grid.Row>
     )
   }
 
-  renderTodosList() {
+  renderImagesList() {
     return (
       <Grid padded>
-        {this.state.todos.map((todo, pos) => {
+        {this.state.images.map((image) => {
           return (
-            <div style={{ marginBottom: '20px' }}>
-              <Card key={todo.todoId}>
-                {todo.attachmentUrl && (
-                  <Image src={todo.attachmentUrl} wrapped ui={false} />
+            <div key={image.imageId} style={{ marginBottom: '20px' }}>
+              <Card  >
+                {image.attachmentUrl && (
+                  <ImageUI src={image.attachmentUrl} wrapped ui={false} />
                 )}
                 <Card.Content>
-                  <Card.Header>{todo.name}</Card.Header>
+                  <Card.Header>{image.name}</Card.Header>
                   <Card.Meta>
-                    <span className='date'>{todo.dueDate}</span>
+                    <span className='date'>{image.dueDate}</span>
                   </Card.Meta>
                   <Card.Description>
                     <Button
                       icon
                       color="blue"
-                      onClick={() => this.onEditButtonClick(todo.todoId)}
+                      onClick={() => this.onEditButtonClick(image.imageId)}
                     >
                       <Icon name="pencil" />
                     </Button>
                     <Button
                       icon
                       color="red"
-                      onClick={() => this.onTodoDelete(todo.todoId)}
+                      onClick={() => this.onImageDelete(image.imageId)}
                     >
                       <Icon name="delete" />
                     </Button>
