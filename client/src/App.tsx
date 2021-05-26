@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link, Route, Router, Switch } from 'react-router-dom'
-import { Grid, Menu, Segment } from 'semantic-ui-react'
+import { Grid, Menu, Segment, Button } from 'semantic-ui-react'
 
 import Auth from './auth/Auth'
 import { EditTodo } from './components/EditTodo'
@@ -54,27 +54,26 @@ export default class App extends Component<AppProps, AppState> {
   }
 
   generateMenu() {
-    return (
-      <Menu>
-        <Menu.Item name="home">
-          <Link to="/">Home</Link>
-        </Menu.Item>
-
-        <Menu.Menu position="right">{this.logInLogOutButton()}</Menu.Menu>
-      </Menu>
-    )
+    if (this.props.auth.isAuthenticated()) {
+      return (
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Button style={{ backgroundColor: "#a8323c", color: 'white' }}> <Link style={{ color: "white" }} to="/">Home</Link> </Button>
+          <Button style={{ backgroundColor: "#a8323c", color: 'white' }}> {this.logInLogOutButton()}</Button>
+        </div>
+      )
+    }
   }
 
   logInLogOutButton() {
     if (this.props.auth.isAuthenticated()) {
       return (
-        <Menu.Item name="logout" onClick={this.handleLogout}>
+        <Menu.Item style={{ color: 'white'}} name="logout" onClick={this.handleLogout}>
           Log Out
         </Menu.Item>
       )
     } else {
       return (
-        <Menu.Item name="login" onClick={this.handleLogin}>
+        <Menu.Item style={{ color: 'white'}} name="login" onClick={this.handleLogin}>
           Log In
         </Menu.Item>
       )
