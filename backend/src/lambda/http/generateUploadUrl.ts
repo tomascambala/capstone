@@ -1,99 +1,28 @@
 import 'source-map-support/register'
-import * as AWS  from 'aws-sdk'
-import * as middy from 'middy'
-import { cors } from 'middy/middlewares'
-
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-
-import { createLogger } from '../../utils/logger'
+import { generateUploadUrl, updateAttachmentUrl } from '../../businessLogic/todo'
 import { getUserId } from '../utils'
-const logger = createLogger('generateUploadUrl')
+import * as uuid from 'uuid'
+import { createLogger } from '../../utils/logger'
 
-const docClient = new AWS.DynamoDB.DocumentClient()
-const s3 = new AWS.S3({
-  signatureVersion: 'v4'
-})
+const logger = createLogger('createTodo')
 
-const todosTable = process.env.TODOS_TABLE
-const todosIndex = process.env.TODOS_INDEX
-const bucketName = process.env.TODOS_ATTACHMENT_S3_BUCKET
-const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
 
-export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  logger.info('Processing generateUpload  event', { event })
   const todoId = event.pathParameters.todoId
-  const userId = getUserId(event)
-  logger.info({userId: userId, todoId: todoId})
+  const userId = getUserId(event);
+  const attachmentId = uuid.v4();
 
-  try{
-    logger.info('Updating  with attachment')
-    await todoUpdate(userId, todoId)
-    logger.info('Updated with attachment')
-
-    logger.info('Getting uploaded url')
-    const url = getUploadUrl(todoId)
-    logger.info('Got uploaded url')
-
-    // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        uploadUrl: url
-      })
-    }
-  } catch(e) {
-    logger.error('Error getting uploaded url', {error: e.message})
-    return {
-      statusCode: 404,
-      body: JSON.stringify({
-        error: 'Error getting uploaded url'
-      })
-    }
-  }
-})
-
-handler.use(
-  cors({
-    credentials: true
-  })
-)
-
-async function todoUpdate(userId: string, todoId: string) {
-  const result = await docClient.query({
-    TableName: todosTable,
-    IndexName: todosIndex,
-    KeyConditionExpression: 'userId = :userId and todoId = :todoId',
-    ExpressionAttributeValues: {
-      ':userId': userId,
-      ':todoId': todoId
-    }
-  })
-  .promise()
-  if(result.Count === 0){
-    throw new Error('Invalid todoId')
-  }
-
-  const todoItem = result.Items[0]
-
-  logger.info('Updating todo', {todoId: todoId})
-
-  await docClient.update({
-    TableName: todosTable,
-    Key:{
-      "userId": todoItem.userId,
-      "createdAt": todoItem.createdAt
+  const uploadUrl = await generateUploadUrl(attachmentId);
+  await updateAttachmentUrl(userId, todoId, attachmentId);
+  return {
+    statusCode: 200,
+    headers: {
+      'Access-Control-Allow-Origin': '*'
     },
-    UpdateExpression: "set attachmentUrl=:attachmentUrl",
-    ExpressionAttributeValues:{
-        ":attachmentUrl":`https://${bucketName}.s3.amazonaws.com/${todoId}`,
-    },
-    ReturnValues:"UPDATED_NEW"
-  }).promise()
-}
-
-function getUploadUrl(todoId: string) {
-  return s3.getSignedUrl('putObject', {
-    Bucket: bucketName,
-    Key: todoId,
-    Expires: urlExpiration
-  })
+    body: JSON.stringify({
+      uploadUrl
+    })
+  }
 }

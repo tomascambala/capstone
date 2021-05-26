@@ -1,40 +1,27 @@
 import 'source-map-support/register'
-import * as middy from 'middy'
-import { cors } from 'middy/middlewares'
-
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
-
-import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
-import { getUserId } from '../utils'
-
 import { createLogger } from '../../utils/logger'
-import { createTodo } from '../../businessLogic/todos'
+import { createTodo } from '../../businessLogic/todo'
+import { getUserId } from '../utils'
+import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
+
 const logger = createLogger('createTodo')
 
-export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  logger.info('proxy handler event', { event })
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
+
   const userId = getUserId(event)
+  const createdTodo = await createTodo(userId, newTodo)
 
-  // TODO: Implement creating a new TODO item
-  try{
-    const newItem = await createTodo(newTodo, userId)
-    return {
-      statusCode: 201,
-      body: JSON.stringify({
-        item: newItem
-      })
-    }
-  } catch(e) {
-    logger.error('Error creating <todo>', {error: e.message})
-    return {
-      statusCode: 400,
-      body: ''
-    }
+  return {
+    statusCode: 201,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Credentials': true
+    },
+    body: JSON.stringify({
+      item: createdTodo
+    })
   }
-})
-
-handler.use(
-  cors({
-    credentials: true
-  })
-)
+}
