@@ -9,3 +9,5 @@ Serverless app for creating cards of Images
 2. cd clients
 3. npm install
 4. npm run start
+5. cd backend
+6. npm install
