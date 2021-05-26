@@ -1,5 +1,5 @@
 service:
-  name: serverless-tomascamb-images
+  name: serverless-tomascambala-images
 
 plugins:
   - serverless-webpack
@@ -15,9 +15,9 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    IMAGES_TABLE: tomascambimages-${self:provider.stage}
+    IMAGES_TABLE: tomascambalalaimages-${self:provider.stage}
     IMAGES_BY_USER_INDEX: ImagesByUserIndex
-    ATTACHMENTS_S3_BUCKET: tomascambimages-attachments-${self:provider.stage}
+    ATTACHMENTS_S3_BUCKET: tomascambalaimages-attachments-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 3000
 
   tracing:
