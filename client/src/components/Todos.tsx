@@ -4,7 +4,7 @@ import update from 'immutability-helper'
 import * as React from 'react'
 import {
   Button,
-  Checkbox,
+  Card,
   Divider,
   Grid,
   Header,
@@ -161,44 +161,35 @@ export class Todos extends React.PureComponent<TodosProps, TodosState> {
       <Grid padded>
         {this.state.todos.map((todo, pos) => {
           return (
-            <Grid.Row key={todo.todoId}>
-              <Grid.Column width={1} verticalAlign="middle">
-                <Checkbox
-                  onChange={() => this.onTodoCheck(pos)}
-                  checked={todo.done}
-                />
-              </Grid.Column>
-              <Grid.Column width={10} verticalAlign="middle">
-                {todo.name}
-              </Grid.Column>
-              <Grid.Column width={3} floated="right">
-                {todo.dueDate}
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="blue"
-                  onClick={() => this.onEditButtonClick(todo.todoId)}
-                >
-                  <Icon name="pencil" />
-                </Button>
-              </Grid.Column>
-              <Grid.Column width={1} floated="right">
-                <Button
-                  icon
-                  color="red"
-                  onClick={() => this.onTodoDelete(todo.todoId)}
-                >
-                  <Icon name="delete" />
-                </Button>
-              </Grid.Column>
-              {todo.attachmentUrl && (
-                <Image src={todo.attachmentUrl} size="small" wrapped />
-              )}
-              <Grid.Column width={16}>
-                <Divider />
-              </Grid.Column>
-            </Grid.Row>
+            <div style={{ marginBottom: '20px' }}>
+              <Card key={todo.todoId}>
+                {todo.attachmentUrl && (
+                  <Image src={todo.attachmentUrl} wrapped ui={false} />
+                )}
+                <Card.Content>
+                  <Card.Header>{todo.name}</Card.Header>
+                  <Card.Meta>
+                    <span className='date'>{todo.dueDate}</span>
+                  </Card.Meta>
+                  <Card.Description>
+                    <Button
+                      icon
+                      color="blue"
+                      onClick={() => this.onEditButtonClick(todo.todoId)}
+                    >
+                      <Icon name="pencil" />
+                    </Button>
+                    <Button
+                      icon
+                      color="red"
+                      onClick={() => this.onTodoDelete(todo.todoId)}
+                    >
+                      <Icon name="delete" />
+                    </Button>
+                  </Card.Description>
+                </Card.Content>
+              </Card>
+            </div>
           )
         })}
       </Grid>

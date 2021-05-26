@@ -56,9 +56,9 @@ export default class App extends Component<AppProps, AppState> {
   generateMenu() {
     if (this.props.auth.isAuthenticated()) {
       return (
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10%'  }}>
           <Button style={{ backgroundColor: "#a8323c", color: 'white' }}> <Link style={{ color: "white" }} to="/">Home</Link> </Button>
-          <Button style={{ backgroundColor: "#a8323c", color: 'white' }}> {this.logInLogOutButton()}</Button>
+          <Button style={{ backgroundColor: "#a8323c", color: 'white'}}> {this.logInLogOutButton()}</Button>
         </div>
       )
     }
