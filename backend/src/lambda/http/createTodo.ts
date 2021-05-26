@@ -1,18 +1,18 @@
 import 'source-map-support/register'
 import { createLogger } from '../../utils/logger'
-import { createTodo } from '../../businessLogic/todo'
+import { createImage } from '../../businessLogic/image'
 import { getUserId } from '../utils'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
+import { CreateImageRequest } from '../../requests/CreateImageRequest'
 
-const logger = createLogger('createTodo')
+const logger = createLogger('createImage')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   logger.info('proxy handler event', { event })
-  const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  const newImage: CreateImageRequest = JSON.parse(event.body)
 
   const userId = getUserId(event)
-  const createdTodo = await createTodo(userId, newTodo)
+  const createdImage = await createImage(userId, newImage)
 
   return {
     statusCode: 201,
@@ -21,7 +21,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       'Access-Control-Allow-Credentials': true
     },
     body: JSON.stringify({
-      item: createdTodo
+      item: createdImage
     })
   }
 }

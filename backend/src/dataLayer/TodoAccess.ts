@@ -3,63 +3,63 @@ import 'source-map-support/register'
 import * as AWS from 'aws-sdk'
 import { DocumentClient } from 'aws-sdk/clients/dynamodb'
 import * as AWSXRay from 'aws-xray-sdk'
-import { TodoItem } from '../models/TodoItem'
-import { TodoUpdate } from '../models/TodoUpdate'
+import { ImageItem } from '../models/ImageItem'
+import { ImageUpdate } from '../models/ImageUpdate'
 import { createLogger } from '../utils/logger'
 
-const logger = createLogger('todosAccess')
+const logger = createLogger('imagesAccess')
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-export class TodosAccess {
+export class ImagesAccess {
 
   constructor(
     private readonly docClient: DocumentClient = new XAWS.DynamoDB.DocumentClient(),
-    private readonly todosTable = process.env.TODOS_TABLE,
-    private readonly todosByUserIndex = process.env.TODOS_BY_USER_INDEX
+    private readonly imagesTable = process.env.IMAGES_TABLE,
+    private readonly imagesByUserIndex = process.env.IMAGES_BY_USER_INDEX
   ) {}
 
-  async getTodoItem(todoId: string): Promise<TodoItem> {
-    logger.info(`From ${this.todosTable} getting user todo item: ${todoId}`)
+  async getImageItem(imageId: string): Promise<ImageItem> {
+    logger.info(`From ${this.imagesTable} getting user image item: ${imageId}`)
 
     const result = await this.docClient.get({
-      TableName: this.todosTable,
+      TableName: this.imagesTable,
       Key: {
-        todoId
+        imageId
       }
     }).promise()
 
     const item = result.Item
 
-    return item as TodoItem
+    return item as ImageItem
   }
 
-  async createTodoItem(todoItem: TodoItem) {
-    logger.info(`From ${this.todosTable} create Todo Item: ${todoItem}`)
+  async createImageItem(imageItem: ImageItem) {
+    logger.info(`From ${this.imagesTable} create Image Item: ${imageItem}`)
 
     await this.docClient.put({
-      TableName: this.todosTable,
-      Item: todoItem,
+      TableName: this.imagesTable,
+      Item: imageItem,
     }).promise()
   }
 
-  async deleteTodoItem(todoId: string) {
+  async deleteImageItem(imageId: string) {
 
     await this.docClient.delete({
-      TableName: this.todosTable,
+      TableName: this.imagesTable,
       Key: {
-        todoId
+        imageId
       }
     }).promise()    
   }
 
-  async updateAttachmentUrl(todoId: string, attachmentUrl: string) {
-    logger.info(`From ${this.todosTable}update attachmentURL: ${attachmentUrl} and with ${todoId}`)
+  async updateAttachmentUrl(imageId: string, attachmentUrl: string) {
+    logger.info(`From ${this.imagesTable}update attachmentURL: ${attachmentUrl} and with ${imageId}`)
 
     await this.docClient.update({
-      TableName: this.todosTable,
+      TableName: this.imagesTable,
       Key: {
-        todoId
+        imageId
       },
       UpdateExpression: 'set attachmentUrl = :attachmentUrl',
       ExpressionAttributeValues: {
@@ -68,32 +68,32 @@ export class TodosAccess {
     }).promise()
   }
 
-   async updateTodoItem(todoId: string, todoUpdate: TodoUpdate) {
-    logger.info(`From ${this.todosTable}update update totoId: ${todoId} and with  todoUpdate ${todoUpdate}`)
+   async updateImageItem(imageId: string, imageUpdate: ImageUpdate) {
+    logger.info(`From ${this.imagesTable}update update totoId: ${imageId} and with  imageUpdate ${imageUpdate}`)
 
     await this.docClient.update({
-      TableName: this.todosTable,
+      TableName: this.imagesTable,
       Key: {
-        todoId
+        imageId
       },
       UpdateExpression: 'set #name = :name, dueDate = :dueDate, done = :done',
       ExpressionAttributeNames: {
         "#name": "name"
       },
       ExpressionAttributeValues: {
-        ":name": todoUpdate.name,
-        ":dueDate": todoUpdate.dueDate,
-        ":done": todoUpdate.done
+        ":name": imageUpdate.name,
+        ":dueDate": imageUpdate.dueDate,
+        ":done": imageUpdate.done
       }
     }).promise()   
   }
 
-  async getTodoItems(userId: string): Promise<TodoItem[]> {
-    logger.info(`From ${this.todosTable} getting todo items for user ${userId}`)
+  async getImageItems(userId: string): Promise<ImageItem[]> {
+    logger.info(`From ${this.imagesTable} getting image items for user ${userId}`)
 
     const result = await this.docClient.query({
-      TableName: this.todosTable,
-      IndexName: this.todosByUserIndex,
+      TableName: this.imagesTable,
+      IndexName: this.imagesByUserIndex,
       KeyConditionExpression: 'userId = :userId',
       ExpressionAttributeValues: {
         ':userId': userId
@@ -102,7 +102,7 @@ export class TodosAccess {
 
     const items = result.Items
 
-    return items as TodoItem[]
+    return items as ImageItem[]
   }
 
 }

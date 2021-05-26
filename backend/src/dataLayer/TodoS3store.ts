@@ -5,7 +5,7 @@ import * as AWSXRay from 'aws-xray-sdk'
 
 const XAWS = AWSXRay.captureAWS(AWS)
 
-export class TodoS3store {
+export class ImageS3store {
 
   constructor(
     private readonly s3 = new XAWS.S3({ signatureVersion: 'v4' }),

@@ -1,12 +1,12 @@
 {
     "$schema": "http://json-schema.org/draft-04/schema",
-    "title": "todoItem",
+    "title": "imageItem",
     "type": "object",
     "properties": {
       "userId": {
         "type": "string"
       },
-      "todoId": {
+      "imageId": {
         "type": "string"
       },
       "createdAt": {

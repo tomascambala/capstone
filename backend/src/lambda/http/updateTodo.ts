@@ -1,19 +1,19 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
-import { updateTodo } from '../../businessLogic/todo'
+import { UpdateImageRequest } from '../../requests/UpdateImageRequest'
+import { updateImage } from '../../businessLogic/image'
 import { getUserId } from '../utils'
 import { createLogger } from '../../utils/logger'
 
-const logger = createLogger('createTodo')
+const logger = createLogger('createImage')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  logger.info('Processing updateTodo event', { event })
-  const todoId = event.pathParameters.todoId
-  const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
+  logger.info('Processing updateImage event', { event })
+  const imageId = event.pathParameters.imageId
+  const updatedImage: UpdateImageRequest = JSON.parse(event.body)
   const userId = getUserId(event)
   
-  await updateTodo(userId, todoId, updatedTodo)
+  await updateImage(userId, imageId, updatedImage)
   return {
     statusCode: 200,
     headers: {

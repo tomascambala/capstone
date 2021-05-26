@@ -1,7 +1,7 @@
 /**
- * Fields in a request to update a single TODO item.
+ * Fields in a request to update a single IMAGE item.
  */
-export interface UpdateTodoRequest {
+export interface UpdateImageRequest {
   name: string
   dueDate: string
   done: boolean

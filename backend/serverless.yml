@@ -15,8 +15,8 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: tomascambimages-${self:provider.stage}
-    TODOS_BY_USER_INDEX: TodosByUserIndex
+    IMAGES_TABLE: tomascambimages-${self:provider.stage}
+    IMAGES_BY_USER_INDEX: ImagesByUserIndex
     ATTACHMENTS_S3_BUCKET: tomascambimages-attachments-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 3000
 
@@ -28,34 +28,34 @@ custom:
   documentation:
     api:
       info: v1.0.0
-      title: serverless-todo-app
+      title: serverless-image-app
       description: AWS configuration
     models:
-        - name: CreateTodoRequest
+        - name: CreateImageRequest
           contentType: 'application/json'
-          schema: ${file(models/TodoItem.json)}
-        - name: UpdateTodoRequest
+          schema: ${file(models/ImageItem.json)}
+        - name: UpdateImageRequest
           contentType: 'application/json'
-          schema: ${file(models/TodoUpdate.json)}
+          schema: ${file(models/ImageUpdate.json)}
 
 functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
 
-  GetTodos:
-    handler: src/lambda/http/getTodos.handler
+  GetImages:
+    handler: src/lambda/http/getImages.handler
     events:
       - http:
           method: get
-          path: todos
+          path: images
           cors: true
           auth: Auth
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Query
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}/index/${self:provider.environment.TODOS_BY_USER_INDEX}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}/index/${self:provider.environment.IMAGES_BY_USER_INDEX}
       - Effect: Allow
         Action:
           - xray:GetSamplingRules
@@ -71,25 +71,25 @@ functions:
         Resource:
           - "*"
 
-  CreateTodo:
-    handler: src/lambda/http/createTodo.handler
+  CreateImage:
+    handler: src/lambda/http/createImage.handler
     events:
       - http:
           method: post
-          path: todos
+          path: images
           cors: true
           auth: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
-            summary: Create a new todo
-            description: Create a new todo
+            summary: Create a new image
+            description: Create a new image
             requestModels:
-              'application/json': CreateTodoRequest
+              'application/json': CreateImageRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:PutItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
       - Effect: Allow
         Action:
           - xray:GetSamplingRules
@@ -105,26 +105,26 @@ functions:
         Resource:
           - "*"
 
-  UpdateTodo:
-    handler: src/lambda/http/updateTodo.handler
+  UpdateImage:
+    handler: src/lambda/http/updateImage.handler
     events:
       - http:
           method: put
-          path: todos/{todoId}
+          path: images/{imageId}
           cors: true
           auth: Auth
           reqValidatorName: RequestBodyValidator
           documentation:
-            summary: Update todo
-            description: Update todo
+            summary: Update image
+            description: Update image
             requestModels:
-              'application/json': UpdateTodoRequest
+              'application/json': UpdateImageRequest
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
       - Effect: Allow
         Action:
           - xray:GetSamplingRules
@@ -140,12 +140,12 @@ functions:
         Resource:
           - "*"
 
-  DeleteTodo:
-    handler: src/lambda/http/deleteTodo.handler
+  DeleteImage:
+    handler: src/lambda/http/deleteImage.handler
     events:
       - http:
           method: delete
-          path: todos/{todoId}
+          path: images/{imageId}
           cors: true
           auth: Auth
     iamRoleStatements:
@@ -153,7 +153,7 @@ functions:
         Action:
           - dynamodb:DeleteItem
           - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
       - Effect: Allow
         Action:
           - xray:GetSamplingRules
@@ -174,7 +174,7 @@ functions:
     events:
       - http:
           method: post
-          path: todos/{todoId}/attachment
+          path: images/{imageId}/attachment
           cors: true
           auth: Auth
     iamRoleStatements:
@@ -186,7 +186,7 @@ functions:
         Action:
           - dynamodb:UpdateItem
           - dynamodb:GetItem
-        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.IMAGES_TABLE}
       - Effect: Allow
         Action:
           - xray:GetSamplingRules
@@ -226,23 +226,23 @@ resources:
         RestApiId:
           Ref: ApiGatewayRestApi
     # Dynamo DB
-    TodosTable:
+    ImagesTable:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
           - AttributeName: userId
             AttributeType: S
-          - AttributeName: todoId
+          - AttributeName: imageId
             AttributeType: S
           - AttributeName: createdAt
             AttributeType: S
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: imageId
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
-        TableName: ${self:provider.environment.TODOS_TABLE}
+        TableName: ${self:provider.environment.IMAGES_TABLE}
         GlobalSecondaryIndexes:
-          - IndexName: ${self:provider.environment.TODOS_BY_USER_INDEX}
+          - IndexName: ${self:provider.environment.IMAGES_BY_USER_INDEX}
             KeySchema:
               - AttributeName: userId
                 KeyType: HASH

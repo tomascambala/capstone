@@ -1,38 +1,38 @@
-import { CreateTodoRequest } from '../requests/CreateTodoRequest'
-import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
+import { CreateImageRequest } from '../requests/CreateImageRequest'
+import { UpdateImageRequest } from '../requests/UpdateImageRequest'
 import * as uuid from 'uuid'
-import { TodoItem } from '../models/TodoItem'
-import { TodosAccess } from '../dataLayer/TodoAccess'
-import { TodoS3store } from '../dataLayer/TodoS3store'
-import { TodoUpdate } from '../models/TodoUpdate'
+import { ImageItem } from '../models/ImageItem'
+import { ImagesAccess } from '../dataLayer/ImageAccess'
+import { ImageS3store } from '../dataLayer/ImageS3store'
+import { ImageUpdate } from '../models/ImageUpdate'
 import { createLogger } from '../utils/logger'
 
-const logger = createLogger('todos')
-const todosAccess = new TodosAccess();
-const todoS3store = new TodoS3store()
+const logger = createLogger('images')
+const imagesAccess = new ImagesAccess();
+const imageS3store = new ImageS3store()
 
-export async function createTodo(userId: string, createTodoRequest: CreateTodoRequest): Promise<TodoItem> {
-  const todoId = uuid.v4()
+export async function createImage(userId: string, createImageRequest: CreateImageRequest): Promise<ImageItem> {
+  const imageId = uuid.v4()
  
   
-  const newItem: TodoItem = {
+  const newItem: ImageItem = {
     userId,
-    todoId,
+    imageId,
     createdAt: new Date().toISOString(),
     done: false,
     attachmentUrl: null,
-    ...createTodoRequest
+    ...createImageRequest
   }
-  logger.info(`Function createTodo creates ${todoId} for user ${userId}`, { userId, todoId, todoItem: newItem })
-  await todosAccess.createTodoItem(newItem)
+  logger.info(`Function createImage creates ${imageId} for user ${userId}`, { userId, imageId, imageItem: newItem })
+  await imagesAccess.createImageItem(newItem)
 
   return newItem
 }
 
-export async function deleteTodo(userId: string, todoId: string) {
-  logger.info(`Deleting Todo ${todoId} for user ${userId}`, { userId, todoId})
+export async function deleteImage(userId: string, imageId: string) {
+  logger.info(`Deleting Image ${imageId} for user ${userId}`, { userId, imageId})
 
-  const item = await todosAccess.getTodoItem(todoId)
+  const item = await imagesAccess.getImageItem(imageId)
 
   if (!item)
     throw new Error('Item is not exists')
@@ -41,19 +41,19 @@ export async function deleteTodo(userId: string, todoId: string) {
     throw new Error('User is not authorized')
   }
 
-  todosAccess.deleteTodoItem(todoId)
+  imagesAccess.deleteImageItem(imageId)
 }
 
-export async function getTodos(userId: string): Promise<TodoItem[]> {
-  logger.info(`Function getTodos retrieves userId: ${userId}`, { userId })
-  return await todosAccess.getTodoItems(userId)
+export async function getImages(userId: string): Promise<ImageItem[]> {
+  logger.info(`Function getImages retrieves userId: ${userId}`, { userId })
+  return await imagesAccess.getImageItems(userId)
 }
 
-export async function updateAttachmentUrl(userId: string, todoId: string, attachmentId: string) {
+export async function updateAttachmentUrl(userId: string, imageId: string, attachmentId: string) {
 
-  const attachmentUrl = await todoS3store.getAttachmentUrl(attachmentId)
+  const attachmentUrl = await imageS3store.getAttachmentUrl(attachmentId)
 
-  const item = await todosAccess.getTodoItem(todoId)
+  const item = await imagesAccess.getImageItem(imageId)
 
   if (!item) {
     throw new Error('Item is not exists')
@@ -62,22 +62,22 @@ export async function updateAttachmentUrl(userId: string, todoId: string, attach
     throw new Error('Authorization is required for updating item')
   }
 
-  await todosAccess.updateAttachmentUrl(todoId, attachmentUrl)
+  await imagesAccess.updateAttachmentUrl(imageId, attachmentUrl)
 }
 
 export async function generateUploadUrl(attachmentId: string): Promise<string> {
   logger.info(`generate Upload URl with attachmentID ${attachmentId}`, { attachmentId })
  
-  const uploadUrl = await todoS3store.getUploadUrl(attachmentId)
+  const uploadUrl = await imageS3store.getUploadUrl(attachmentId)
 
   return uploadUrl
 }
 
 
-export async function updateTodo(userId: string, todoId: string, updateTodoRequest: UpdateTodoRequest) {
-  logger.info(`updateTodo with ${userId}`, { userId })
+export async function updateImage(userId: string, imageId: string, updateImageRequest: UpdateImageRequest) {
+  logger.info(`updateImage with ${userId}`, { userId })
 
-  const item = await todosAccess.getTodoItem(todoId)
+  const item = await imagesAccess.getImageItem(imageId)
 
   if (!item) {
     throw new Error('Item is not exists')
@@ -86,5 +86,5 @@ export async function updateTodo(userId: string, todoId: string, updateTodoReque
     throw new Error('Authorization is required for updating item')
   }
 
-  todosAccess.updateTodoItem(todoId, updateTodoRequest as TodoUpdate)
+  imagesAccess.updateImageItem(imageId, updateImageRequest as ImageUpdate)
 }
