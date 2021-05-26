@@ -25,7 +25,7 @@ export const handler = middy( async (event: APIGatewayProxyEvent): Promise<APIGa
       body: ''
     }
   } catch(e) {
-    logger.error('Error updating todo', { error: e.message })
+    logger.error('Error updating Todo', { error: e.message })
     return {
       statusCode: 400,
       body: ''

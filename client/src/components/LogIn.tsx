@@ -16,9 +16,9 @@ export class LogIn extends React.PureComponent<LogInProps, LogInState> {
   render() {
     return (
       <div>
-        <h1>Please log in</h1>
+        <h2>Please log in to app</h2>
 
-        <Button onClick={this.onLogin} size="huge" color="olive">
+        <Button onClick={this.onLogin} size="huge" color="red">
           Log in
         </Button>
       </div>

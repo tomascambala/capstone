@@ -23,7 +23,7 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
       })
     }
   } catch(e) {
-    logger.error('Error getting todo', { error: e.message})
+    logger.error('Error getting Todo', { error: e.message})
     return {
       statusCode: 400,
       body: ''

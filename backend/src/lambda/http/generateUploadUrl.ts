@@ -25,13 +25,13 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
   logger.info({userId: userId, todoId: todoId})
 
   try{
-    logger.info('Updating todo with attachment')
+    logger.info('Updating  with attachment')
     await todoUpdate(userId, todoId)
-    logger.info('Updated todo with attachment')
+    logger.info('Updated with attachment')
 
-    logger.info('Getting upload url')
+    logger.info('Getting uploaded url')
     const url = getUploadUrl(todoId)
-    logger.info('Got upload url')
+    logger.info('Got uploaded url')
 
     // TODO: Return a presigned URL to upload a file for a TODO item with the provided id
     return {
@@ -41,11 +41,11 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
       })
     }
   } catch(e) {
-    logger.error('Error getting upload url', {error: e.message})
+    logger.error('Error getting uploaded url', {error: e.message})
     return {
       statusCode: 404,
       body: JSON.stringify({
-        error: 'Error getting upload url'
+        error: 'Error getting uploaded url'
       })
     }
   }
